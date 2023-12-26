@@ -1,0 +1,323 @@
+{{ define "cabb" }}
+<!doctype html>
+<html>
+  <head>
+    <title>{{ .Team }}</title>
+    <link rel="stylesheet" href="style.css"/>
+  </head>
+  <body>
+    <h1>Estadísticas {{ .Team }}</h1>
+
+    <section id="stats">
+      {{ template "secshots" . }}
+      {{ template "secasstost" . }}
+      {{ template "secfouls" . }}
+      {{ template "secrebounds" . }}
+      {{ template "secblocks" . }}
+      {{ template "secgames" . }}
+    </section>
+
+    {{ template "results" . }}
+
+    <script src="cabb.js"></script>
+  </body>
+</html>
+{{ end }}
+
+{{ define "results" }}
+{{ $team := .Team }}
+    <article id="results">
+      <h2>Resultados</h2>
+      <table id="matches">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th colspan="2">Local</th>
+            <th colspan="2">Visitante</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{ range .Matches }}
+          <tr class="match {{ matchClass . }} {{ highlight $team . }}">
+            <td>{{ .Date }}</td>
+            <td>{{ .HomeTeam }}</td>
+            <td class="num">{{ .HomeScore }}</td>
+            <td class="num">{{ .AwayScore }}</td>
+            <td>{{ .AwayTeam }}</td>
+          </tr>
+          {{ end }}
+        </tbody>
+      </table>
+
+      <h3>Totales</h3>
+      <table id="matches-stats">
+        <thead>
+          <tr>
+            <th rowspan="2">PJ</th>
+            <th rowspan="2">PG</th>
+            <th rowspan="2">PP</th>
+            <th colspan="2">PF</th>
+            <th colspan="2">PC</th>
+          </tr>
+          <tr>
+            <th>TOTAL</th>
+            <th>PROM.</th>
+            <th>TOTAL</th>
+            <th>PROM.</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            {{- $res := .Matches.Stats .Team -}}
+            <td class="num">{{ len .Matches }}</td>
+            <td class="num">{{ $res.Won }}</td>
+            <td class="num">{{ $res.Lost }}</td>
+            <td class="num">{{ $res.Scored }}</td>
+            <td class="num">{{ avg $res.Scored (len .Matches) }}</td>
+            <td class="num">{{ $res.Received }}</td>
+            <td class="num">{{ avg $res.Received (len .Matches) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </article>
+{{ end }}
+
+{{ define "secgames" }}
+      <article id="games">
+        <h2>Partidos</h2>
+        <table>
+          <thead>
+            <tr>
+              <th class="player">Jugador</th>
+              <th>Jugados</th>
+              <th>Minutos</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{ range $n, $s := .PlayerStats }}{{ if eq $n "TOTALES" }}{{ continue }}{{ end }}
+            <tr>
+              <td class="player">{{ $n }}</td>
+              <td class="num">{{ .GamesPlayed }}</td>
+              <td class="num">{{ avg (ms .PlayedMillis) .GamesPlayed }}</td>
+            </tr>
+            {{ end }}
+          </tbody>
+        </table>
+      </article>
+{{ end }}
+
+{{ define "secshots" }}
+      <article id="shots">
+        <h2>Tiros</h2>
+        <table>
+          <thead>
+            <tr>
+              <th class="player" rowspan="2">Jugador</th>
+              <th colspan="3">Libres</th>
+              <th colspan="3">Dobles</th>
+              <th colspan="3">Triples</th>
+              <th colspan="2">Puntos</th>
+            </tr>
+            <tr>
+              <th>CONV.</th>
+              <th>INT.</th>
+              <th>%</th>
+              <th>CONV.</th>
+              <th>INT.</th>
+              <th>%</th>
+              <th>CONV.</th>
+              <th>INT.</th>
+              <th>%</th>
+              <th>TOTAL</th>
+              <th>PROM.</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{ range $n, $s := .PlayerStats }}{{ if eq $n "TOTALES" }}{{ continue }}{{ end }}
+            <tr>
+              <td class="player">{{ $n }}</td>
+              {{ block "shots" $s }}
+              <td class="num">{{ .Made1P }}</td>
+              <td class="num">{{ .Shots1P }}</td>
+              <td class="num">{{ avg .Made1P .Shots1P }}</td>
+              <td class="num">{{ .Made2P }}</td>
+              <td class="num">{{ .Shots2P }}</td>
+              <td class="num">{{ avg .Made2P .Shots2P }}</td>
+              <td class="num">{{ .Made3P }}</td>
+              <td class="num">{{ .Shots3P }}</td>
+              <td class="num">{{ avg .Made3P .Shots3P }}</td>
+              <td class="num">{{ .Points }}</td>
+              <td class="num">{{ avg .Points .GamesPlayed }}</td>
+              {{ end }}
+            </tr>
+            {{ end }}
+          </tbody>
+          <tfoot>
+            <td class="totals">TOTALES</td>
+            {{ template "shots" .PlayerStats.TOTALES }}
+          </tfoot>
+        </table>
+      </article>
+{{ end }}
+
+{{ define "secasstost" }}
+      <article id="asstost">
+        <h2>Asistencias, pérdidas y recuperos</h2>
+        <table>
+          <thead>
+            <tr>
+              <th class="player" rowspan="2">Jugador</th>
+              <th colspan="2">Asistencias</th>
+              <th colspan="2">Pérdidas</th>
+              <th colspan="2">Recuperos</th>
+            </tr>
+            <tr>
+              <th>TOTAL</th>
+              <th>PROM.</th>
+              <th>TOTAL</th>
+              <th>PROM.</th>
+              <th>TOTAL</th>
+              <th>PROM.</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{ range $n, $s := .PlayerStats }}{{ if eq $n "TOTALES" }}{{ continue }}{{ end }}
+            <tr>
+              <td class="player">{{ $n }}</td>
+              {{ block "asstost" . }}
+              <td class="num">{{ .Assists }}</td>
+              <td class="num">{{ avg .Assists .GamesPlayed }}</td>
+              <td class="num">{{ .Turnovers }}</td>
+              <td class="num">{{ avg .Turnovers .GamesPlayed }}</td>
+              <td class="num">{{ .Steals }}</td>
+              <td class="num">{{ avg .Steals .GamesPlayed }}</td>
+              {{ end }}
+            </tr>
+            {{ end }}
+          </tbody>
+          <tfoot>
+            <td class="totals">TOTALES</td>
+            {{ template "asstost" .PlayerStats.TOTALES }}
+          </tfoot>
+        </table>
+      </article>
+{{ end }}
+
+{{ define "secfouls" }}
+      <article id="fouls">
+        <h2>Foules</h2>
+        <table>
+          <thead>
+            <tr>
+              <th class="player" rowspan="2">Jugador</th>
+              <th colspan="2">Hechos</th>
+              <th colspan="2">Recibidos</th>
+            </tr>
+            <tr>
+              <th>TOTAL</th>
+              <th>PROM.</th>
+              <th>TOTAL</th>
+              <th>PROM.</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{ range $n, $s := .PlayerStats }}{{ if eq $n "TOTALES" }}{{ continue }}{{ end }}
+            <tr>
+              <td class="player">{{ $n }}</td>
+              {{ block "fouls" . }}
+              <td class="num">{{ .Fouls }}</td>
+              <td class="num">{{ avg .Fouls .GamesPlayed }}</td>
+              <td class="num">{{ .Fouled }}</td>
+              <td class="num">{{ avg .Fouled .GamesPlayed }}</td>
+              {{ end }}
+            </tr>
+            {{ end }}
+          </tbody>
+          <tfoot>
+            <td class="totals">TOTALES</td>
+            {{ template "fouls" .PlayerStats.TOTALES }}
+          </tfoot>
+        </table>
+      </article>
+{{ end }}
+
+{{ define "secrebounds" }}
+      <article id="rebounds">
+        <h2>Rebotes</h2>
+        <table>
+          <thead>
+            <tr>
+              <th class="player" rowspan="2">Jugador</th>
+              <th colspan="2">Totales</th>
+              <th colspan="2">Ofensivos</th>
+              <th colspan="2">Defensivos</th>
+            </tr>
+            <tr>
+              <th>TOTAL</th>
+              <th>PROM.</th>
+              <th>TOTAL</th>
+              <th>PROM.</th>
+              <th>TOTAL</th>
+              <th>PROM.</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{ range $n, $s := .PlayerStats }}{{ if eq $n "TOTALES" }}{{ continue }}{{ end }}
+            <tr>
+              <td class="player">{{ $n }}</td>
+              {{ block "rebounds" . }}
+              <td class="num">{{ .Rebounds }}</td>
+              <td class="num">{{ avg .Rebounds .GamesPlayed }}</td>
+              <td class="num">{{ .ReboundsOff }}</td>
+              <td class="num">{{ avg .ReboundsOff .GamesPlayed }}</td>
+              <td class="num">{{ .ReboundsDef }}</td>
+              <td class="num">{{ avg .ReboundsDef .GamesPlayed }}</td>
+              {{ end }}
+            </tr>
+            {{ end }}
+          </tbody>
+          <tfoot>
+            <td class="totals">TOTALES</td>
+            {{ template "rebounds" .PlayerStats.TOTALES }}
+          </tfoot>
+        </table>
+      </article>
+{{ end }}
+
+{{ define "secblocks" }}
+      <article id="blocks">
+        <h2>Tapones</h2>
+        <table>
+          <thead>
+            <tr>
+              <th class="player" rowspan="2">Jugador</th>
+              <th colspan="2">Hechos</th>
+              <th colspan="2">Recibidos</th>
+            </tr>
+            <tr>
+              <th>TOTAL</th>
+              <th>PROM.</th>
+              <th>TOTAL</th>
+              <th>PROM.</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{ range $n, $s := .PlayerStats }}{{ if eq $n "TOTALES" }}{{ continue }}{{ end }}
+            <tr>
+              <td class="player">{{ $n }}</td>
+              {{ block "blocks" . }}
+              <td class="num">{{ .Blocks }}</td>
+              <td class="num">{{ avg .Blocks .GamesPlayed }}</td>
+              <td class="num">{{ .Blocked }}</td>
+              <td class="num">{{ avg .Blocked .GamesPlayed }}</td>
+              {{ end }}
+            </tr>
+            {{ end }}
+          </tbody>
+          <tfoot>
+            <td class="totals">TOTALES</td>
+            {{ template "blocks" .PlayerStats.TOTALES }}
+          </tfoot>
+        </table>
+      </article>
+{{ end }}
