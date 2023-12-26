@@ -1,0 +1,39 @@
+body {
+    font-family: sans-serif;
+    background: #fff;
+    color: #000;
+    width: 1024px;
+    margin: 0 auto 1em;
+}
+
+.num { font-family: monospace; text-align: right }
+.right { text-align: right }
+tbody tr:nth-child(even) { background: #eee; }
+
+tr.match.win-home td:nth-child(2), tr.match.win-away td:nth-child(5) { font-weight: bold; }
+
+tr.match td.num { width: 3em; }
+
+thead, tfoot {
+    background: #000;
+    color: #fff;
+    font-weight: bold;
+}
+
+tr.match.highlight, td.num.max {
+    font-weight: bold;
+    background-color: darkblue;
+    color: #fff;
+}
+
+#matches {
+    font-size: 90%;
+}
+
+@media print {
+    #toc { display: none; }
+
+    #results {
+        break-before: page;
+    }
+}
