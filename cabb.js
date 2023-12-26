@@ -1,6 +1,5 @@
 document.querySelectorAll("#stats tbody").forEach(function(tbody) {
     var max = new Array();
-    var tds = new Array();
 
     tbody.querySelectorAll("tr").forEach(function(tr) {
         tr.querySelectorAll("td.num").forEach(function(td, i) {
@@ -10,14 +9,17 @@ document.querySelectorAll("#stats tbody").forEach(function(tbody) {
             var v = parseFloat(td.innerText);
             if (v > max[i]) {
                 max[i] = v;
-                tds[i] = td;
             }
         });
     });
 
-    tds.forEach(function(td) {
-        td.classList.add("max");
-    })
+    tbody.querySelectorAll("tr").forEach(function(tr) {
+        tr.querySelectorAll("td.num").forEach(function(td, i) {
+            if(max[i] == parseFloat(td.innerText)) {
+                td.classList.add("max");
+            }
+        });
+    });
 });
 
 document.querySelectorAll("th").forEach(function(th) {
