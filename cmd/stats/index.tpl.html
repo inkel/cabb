@@ -8,6 +8,16 @@
   <body>
     <h1>Estadísticas {{ .Team }}</h1>
 
+    <form id="team" onsubmit="false">
+      <fieldset>
+        <legend>Destacar jugador</legend>
+        <label><input type="radio" name="player" value="" checked/>Ninguno</label>
+        {{ range $n, $p := .PlayerStats }}{{ if eq $n "TOTALES" }}{{ continue }}{{ end }}
+        <label><input type="radio" name="player" value="{{ $n }}"/>{{ $n }}</label>
+        {{ end }}
+      </fieldset>
+    </form>
+
     <section id="stats">
       {{ template "secshots" . }}
       {{ template "secasstost" . }}
