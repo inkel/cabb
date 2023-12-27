@@ -37,6 +37,7 @@ tbody tr.highlight, td.num.max {
 @media print {
     #toc, #team { display: none; }
 
+    article { break-inside: avoid; }
 
     #results {
         break-before: page;
