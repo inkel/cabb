@@ -14,11 +14,13 @@ tr.match.win-home td:nth-child(2), tr.match.win-away td:nth-child(5) { font-weig
 
 tr.match td.num { width: 3em; }
 
-thead, tfoot {
+thead th, tfoot td {
     background: #000;
     color: #fff;
     font-weight: bold;
 }
+
+table { width: 100%; }
 
 tbody tr.highlight, td.num.max {
     font-weight: bold;
@@ -38,6 +40,10 @@ tbody tr.highlight, td.num.max {
     #toc, #team { display: none; }
 
     article { break-inside: avoid; }
+
+    table { width: auto; }
+
+    tbody tr.highlight { background-color: none; }
 
     #results {
         break-before: page;
