@@ -8,6 +8,7 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"strings"
 	"text/tabwriter"
 	"text/template"
 	"time"
@@ -219,6 +220,8 @@ func main() {
 					if p.PlayedMillis == 0 {
 						continue
 					}
+
+					p.Name = strings.TrimSpace(p.Name)
 
 					s := ss[p.Name]
 
