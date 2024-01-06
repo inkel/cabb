@@ -20,7 +20,7 @@ thead, tfoot {
     font-weight: bold;
 }
 
-tr.match.highlight, td.num.max {
+tbody tr.highlight, td.num.max {
     font-weight: bold;
     background-color: darkblue;
     color: #fff;
@@ -30,8 +30,13 @@ tr.match.highlight, td.num.max {
     font-size: 90%;
 }
 
+#team label {
+    display: block;
+}
+
 @media print {
-    #toc { display: none; }
+    #toc, #team { display: none; }
+
 
     #results {
         break-before: page;

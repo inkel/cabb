@@ -98,3 +98,19 @@ document.querySelectorAll("h2").forEach(function(h) {
     li.appendChild(a);
     ol.appendChild(li);
 });
+
+function highlightPlayer(evt) {
+    const name = this.value;
+
+    document.querySelectorAll("td.player").forEach(function(td) {
+        const tr = td.parentElement;
+        tr.classList.remove("highlight");
+        if (td.innerText == name) {
+            tr.classList.add("highlight");
+        }
+    });
+}
+
+document.querySelectorAll("input").forEach(function(r) {
+    r.onclick=highlightPlayer;
+});
