@@ -52,8 +52,6 @@ CREATE TABLE IF NOT EXISTS seasons (
        teamId TEXT REFERENCES teams (id) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS sqlite_sequence(name,seq);
-
 CREATE UNIQUE INDEX IF NOT EXISTS season_team_id ON seasons (teamId);
 
 CREATE TABLE IF NOT EXISTS gamedays (
@@ -79,6 +77,9 @@ type playerStats struct {
 	cabb.PlayerStats
 	GamesPlayed int
 }
+
+func (s playerStats) FGMade() int  { return s.Made2P + s.Made3P }
+func (s playerStats) FGShots() int { return s.Shots2P + s.Shots3P }
 
 type teamStats map[string]playerStats
 
@@ -147,6 +148,9 @@ func main() {
 	db, err := sqlx.Connect("sqlite3", "cabb.db")
 	dieIf(err)
 	defer db.Close()
+
+	_, err = db.Exec(schema)
+	dieIf(err)
 
 	var seasonID int64
 
@@ -290,7 +294,7 @@ func main() {
 		wMins  = tabwriter.NewWriter(os.Stdout, 4, 8, 1, ' ', 0)
 	)
 
-	fmt.Fprintln(wShots, "JUGADOR\tPUNTOS\t1P\t2P\t3P")
+	fmt.Fprintln(wShots, "JUGADOR\tPUNTOS\t1P\tTC\t2P\t3P")
 	fmt.Fprintln(wAsTO, "JUGADOR\tASISTENCIAS\tPÉRDIDAS\tRECUPEROS")
 	fmt.Fprintln(wFouls, "JUGADOR\tFOULES\tRECIBIDOS")
 	fmt.Fprintln(wRebs, "JUGADOR\tREBOTES\tOFENSIVOS\tDEFENSIVOS")
@@ -302,10 +306,11 @@ func main() {
 		gp := s.GamesPlayed
 		ms := time.Millisecond * time.Duration(s.PlayedMillis) / time.Minute
 
-		fmt.Fprintf(wShots, "%s\t%4d (%5.2f)\t%s\t%s\t%s\n",
+		fmt.Fprintf(wShots, "%s\t%4d (%5.2f)\t%s\t%s\t%s\t%s\n",
 			n,
 			s.Points, float32(s.Points)/float32(gp),
 			shots(s.Made1P, s.Shots1P),
+			shots(s.FGMade(), s.FGShots()),
 			shots(s.Made2P, s.Shots2P),
 			shots(s.Made3P, s.Shots3P),
 		)

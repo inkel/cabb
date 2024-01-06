@@ -124,11 +124,15 @@
             <tr>
               <th class="player" rowspan="2">Jugador</th>
               <th colspan="3">Libres</th>
+              <th colspan="3">TC</th>
               <th colspan="3">Dobles</th>
               <th colspan="3">Triples</th>
               <th colspan="2">Puntos</th>
             </tr>
             <tr>
+              <th>CONV.</th>
+              <th>INT.</th>
+              <th>%</th>
               <th>CONV.</th>
               <th>INT.</th>
               <th>%</th>
@@ -150,6 +154,9 @@
               <td class="num">{{ .Made1P }}</td>
               <td class="num">{{ .Shots1P }}</td>
               <td class="num">{{ avg .Made1P .Shots1P }}</td>
+              <td class="num">{{ .FGMade }}</td>
+              <td class="num">{{ .FGShots }}</td>
+              <td class="num">{{ avg .FGMade .FGShots }}</td>
               <td class="num">{{ .Made2P }}</td>
               <td class="num">{{ .Shots2P }}</td>
               <td class="num">{{ avg .Made2P .Shots2P }}</td>

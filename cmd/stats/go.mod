@@ -9,4 +9,4 @@ require (
 
 require github.com/mattn/go-sqlite3 v1.14.18
 
-replace github.com/inkel/cabb => /Users/inkel/go/src/github.com/inkel/cabb
+replace github.com/inkel/cabb => /Users/inkel/dev/go/src/github.com/inkel/cabb
