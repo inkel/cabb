@@ -24,8 +24,14 @@ table { width: 100%; }
 
 tbody tr.highlight, td.num.max {
     font-weight: bold;
-    background-color: darkblue;
     color: #fff;
+}
+
+tbody tr.highlight {
+    background-color: lightblue;
+}
+td.num.max {
+    background-color: darkblue;
 }
 
 #matches {
