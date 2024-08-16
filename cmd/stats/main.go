@@ -5,6 +5,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"log/slog"
 	"os"
 	"sort"
 	"strconv"
@@ -98,7 +99,7 @@ func (ms matches) Stats(team string) TeamStats {
 	var res TeamStats
 	for _, m := range ms {
 		home, away := atoi(m.HomeScore), atoi(m.AwayScore)
-		if m.HomeTeam == team {
+		if isDefe(m.HomeTeam) {
 			if home > away {
 				res.Won += 1
 			} else {
@@ -132,6 +133,8 @@ type templateData struct {
 	Team, TeamID string
 }
 
+func isDefe(n string) bool { return strings.HasPrefix(n, "DEFENSORES DE SANTOS LUGARES") }
+
 func main() {
 	var html bool
 
@@ -140,6 +143,22 @@ func main() {
 
 	c, err := cabb.NewClient(uid, deviceID)
 	dieIf(err)
+
+	slog.Info("Procesando equipo", slog.String("id", teamID))
+
+	defe = ""
+	ts, err := c.Teams()
+	dieIf(err)
+	for _, t := range ts {
+		if t.ID == teamID {
+			slog.Info("Equipo encontrado", slog.String("nombre", t.Name))
+			defe = t.Name
+		}
+	}
+	if defe == "" {
+		slog.Error("Equipo no encontrado")
+		return
+	}
 
 	s, err := c.Season(teamID)
 	dieIf(err)
@@ -168,6 +187,7 @@ func main() {
 		TeamID: teamID,
 	}
 
+	slog.Info("Procesando jornadas", slog.Int("jornadas", len(s.Season)))
 	for _, gm := range s.Season {
 		var gmID int64
 		err := db.QueryRowx("SELECT id FROM gamedays WHERE seasonId = $1 AND name = $2", seasonID, gm.Name).Scan(&gmID)
@@ -181,6 +201,7 @@ func main() {
 			dieIf(err)
 		}
 
+		slog.Info("Procesando jornada", slog.String("jornada", gm.Name), slog.String("fecha", gm.Date), slog.Int("partidos", len(gm.Matches)))
 		for _, m := range gm.Matches {
 			if m.HomeTeam == "LIBRE" || m.AwayTeam == "LIBRE" {
 				continue
@@ -198,10 +219,8 @@ func main() {
 				dieIf(err)
 			}
 
-			if m.HomeTeam == defe || m.AwayTeam == defe {
-				if !html {
-					fmt.Printf("Analizando %s\n", m.Title())
-				}
+			if isDefe(m.HomeTeam) || isDefe(m.AwayTeam) {
+				slog.Info("Analizando partido", slog.String("partido", m.Title()))
 
 				data.Matches = append(data.Matches, match{m})
 
@@ -210,7 +229,7 @@ func main() {
 
 				var ps []cabb.PlayerStats
 
-				if s.Match.Home == defe {
+				if isDefe(s.Match.Home) {
 					ps = s.Stats.Home
 				} else {
 					ps = s.Stats.Away
