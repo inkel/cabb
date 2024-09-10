@@ -91,7 +91,9 @@ type matches []match
 
 func atoi(s string) int {
 	n, err := strconv.Atoi(s)
-	dieIf(err)
+	if err != nil {
+		dieIf(fmt.Errorf("atoi(%q): %w", s, err))
+	}
 	return n
 }
 
@@ -217,6 +219,10 @@ func main() {
 
 				matchID, err = res.LastInsertId()
 				dieIf(err)
+			}
+
+			if m.Status != "Terminado" {
+				continue
 			}
 
 			if isDefe(m.HomeTeam) || isDefe(m.AwayTeam) {
