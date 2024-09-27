@@ -305,13 +305,21 @@ func (c Client) Live(m Match) (Live, error) {
 	return l, nil
 }
 
-type Delegations struct {
+type Leagues struct {
 	cabbResponseGeneric
-	Delegations []Delegation `json:"delegaciones"`
+	Leagues []League `json:"delegaciones"`
 }
 
-type Delegation struct {
+type League struct {
 	Name string `json:"provincia"` // JFC
+}
+
+func (c Client) Leagues() ([]League, error) {
+	var r Leagues
+	if err := c.request("delegaciones.ashx", nil, &r); err != nil {
+		return nil, err
+	}
+	return r.Leagues, nil
 }
 
 type Tournament struct {
@@ -324,6 +332,32 @@ type Tournaments struct {
 	Tournaments []Tournament `json:"valores"`
 }
 
+func (c Client) Tournaments(league string) ([]Tournament, error) {
+	var r Tournaments
+	if err := c.request("equipos-jugadores.ashx", url.Values{"accion": {"competiciones"}, "delegacion": {league}}, &r); err != nil {
+		return nil, err
+	}
+	return r.Tournaments, nil
+}
+
+type Categories struct {
+	cabbResponseGeneric
+	Categories []Category `json:"valores"`
+}
+
+type Category struct {
+	ID   string `json:"id"`
+	Name string `json:"nombre"`
+}
+
+func (c Client) Categories(t Tournament) ([]Category, error) {
+	var r Categories
+	if err := c.request("equipos-jugadores.ashx", url.Values{"accion": {"categorias"}, "competicion": {t.ID}}, &r); err != nil {
+		return nil, err
+	}
+	return r.Categories, nil
+}
+
 type Clubs struct {
 	cabbResponseGeneric
 	Clubs []Club `json:"valores"`
@@ -332,6 +366,14 @@ type Clubs struct {
 type Club struct {
 	ID   string `json:"id"`
 	Name string `json:"nombre"`
+}
+
+func (c Client) Clubs(t Tournament, cat Category) ([]Club, error) {
+	var r Clubs
+	if err := c.request("equipos-jugadores.ashx", url.Values{"accion": {"clubes"}, "categoria": {cat.ID}, "competicion": {t.ID}}, &r); err != nil {
+		return nil, err
+	}
+	return r.Clubs, nil
 }
 
 type Teams struct {
